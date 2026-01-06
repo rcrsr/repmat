@@ -1,8 +1,8 @@
+**Experimental** — This is work in progress and may not work reliably yet. Use at your own risk.
+
 # Repmat
 
-> **Experimental** — APIs and conventions may change. Requires Claude Code 1.0.33+.
-
-Turn your software development tasks into reliable AI agents.
+Turn your software development tasks into reliable Claude Code workflows.
 
 ## What Is This?
 
