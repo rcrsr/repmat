@@ -2,14 +2,50 @@
 
 > **Experimental** — APIs and conventions may change. Requires Claude Code 1.0.33+.
 
-A construction kit for building policy-governed agent workflows for Claude Code. Define artifact types, author/reviewer pairs, and policies—Repmat provides the primitives to assemble them.
+Turn your software development tasks into reliable AI agents.
+
+## What Is This?
+
+The more you delegate to Claude Code, the harder consistency gets. Results drift between sessions. Styles clash. Rules you thought were clear get interpreted differently each time.
+
+You can paste your standards into every prompt, but they drift out of sync. You can build custom subagents and commands, but they're either too generic or too specific and hard to share.
+
+Repmat takes a different approach. Define your standards once as **blueprints**—templates that specify what gets built, who builds it, who reviews it, and what rules apply. From there, Repmat generates agents and commands that follow those blueprints consistently, and includes tools to design blueprints from scratch or discover them from existing codebases.
+
+The pattern comes from how regular teams work: developers write code, reviewers check it, everyone follows the same style guide. A blueprint captures that dynamic for Claude Code.
+
+A blueprint binds four things together:
+- **Artifact type** — what gets created (code files, specs, docs)
+- **Author agent** — who builds it
+- **Reviewer agent** — who validates it
+- **Policies** — what rules both follow
+
+Say you want consistent API code for your Python backend. The *artifact type* is your API code—handlers, services, data access layers. The *author* is an engineer agent that writes new endpoints. The *reviewer* validates against your standards. And the *policies* spell out those standards: how to handle errors, where logging goes, what the service layer can import. Define this once, and Repmat generates and maintains agents and supporting commands and policies that follow it every time.
+
+## How It Works
+
+Everything starts with a blueprint—the four things: artifact type, author, reviewer, policies.
+
+You can design a blueprint from scratch, or discover one from existing code. Repmat comes with presets for common use cases—backend services, frontend components, infrastructure, documentation—so you're not starting from zero. When discovering from existing code, Repmat analyzes your codebase, identifies patterns, and proposes a blueprint that fits what's already there.
+
+Once you have a blueprint, Repmat implements it. It generates the author and reviewer agents, wires up the policies, and creates commands to invoke them. You don't write boilerplate—Repmat scaffolds the pieces and keeps them consistent with your blueprint.
+
+Now you can use these new subagents and commands to maintain your artifacts—writing Python API endpoints, generating infrastructure configs, updating documentation, or whatever else you designed the blueprint for.
+
+For the full architecture, see [the framework specification](docs/repmat-framework.md).
 
 ## Quick Start
 
-```bash
-# Install the plugin
-claude plugin install ~/projects/wft --scope user
+### Install
 
+```bash
+/plugin marketplace add rcrsr/claude-plugins
+/plugin install repmat@rcrsr
+```
+
+### Use
+
+```bash
 # Design a new blueprint (greenfield)
 /repmat:design-blueprint backend-code
 
@@ -22,47 +58,6 @@ claude plugin install ~/projects/wft --scope user
 # Generate policies from codebase patterns
 /repmat:create-policies BACKEND src/api/
 ```
-
-## Installation
-
-```bash
-# Local testing
-claude --plugin-dir ~/projects/wft
-
-# Project scope (commits to .claude/settings.json)
-claude plugin install ~/projects/wft --scope project
-
-# User scope (available in all projects)
-claude plugin install ~/projects/wft --scope user
-```
-
-## Blueprints
-
-Think about how teams work: an engineer writes code, a reviewer checks it, and both follow the team's style guide. Repmat captures this pattern as a **blueprint**.
-
-A blueprint binds four things together:
-- **Artifact type** — what gets created (code files, specs, docs)
-- **Author agent** — who builds it
-- **Reviewer agent** — who validates it
-- **Policies** — what rules both follow
-
-**Example**: You want coding agents for your Python backend. Define the blueprint in `registry.yaml`:
-
-```yaml
-artifacts:
-  backend-code:
-    patterns: ["src/api/**/*.py", "src/services/**/*.py"]
-    author: backend-engineer
-    reviewer: backend-code-reviewer
-    policies: [python-style.md, api-patterns.md]
-    auto_review: true
-```
-
-This single definition gives you:
-- A `backend-engineer` agent that writes code following your policies
-- A `backend-code-reviewer` agent that validates against the same policies
-- Automatic review after creation (via `auto_review: true`)
-- Pattern matching to identify which files belong to this artifact type
 
 ## Commands
 
@@ -80,11 +75,11 @@ This single definition gives you:
 | Command | Description |
 |---------|-------------|
 | `/repmat:create-policies <prefix> [path]` | Create policy from codebase patterns |
-| `/repmat:review-policies` | Review all policies against §META |
+| `/repmat:review-policies` | Validate policy documents against formatting standards |
 
 ## Presets
 
-Presets auto-detect patterns and trigger online exploration for current best practices.
+Presets provide detection signals and web search queries to find current best practices for common artifact types.
 
 | Category | Presets | Purpose |
 |----------|---------|---------|
@@ -94,77 +89,3 @@ Presets auto-detect patterns and trigger online exploration for current best pra
 | Documents | `document`, `spec`, `plan`, `requirements`, `runbook`, `api-docs` | Document types |
 
 Usage: `/repmat:discover-blueprint backend-code --preset service`
-
-## How It Works
-
-### Architectural Layers
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  Layer 5: Pipelines                                         │
-│  Orchestrate multiple commands across phases                │
-├─────────────────────────────────────────────────────────────┤
-│  Layer 4: Commands                                          │
-│  User-invocable workflows that transform artifacts          │
-├─────────────────────────────────────────────────────────────┤
-│  Layer 3: Subagents                                         │
-│  Atomic units of work with policy awareness                 │
-├─────────────────────────────────────────────────────────────┤
-│  Layer 2: Policies                                          │
-│  Codified knowledge governing artifacts and behavior        │
-├─────────────────────────────────────────────────────────────┤
-│  Layer 1: Artifacts                                         │
-│  Typed work products—the foundation everything operates on  │
-└─────────────────────────────────────────────────────────────┘
-```
-
-> **Note:** Layer 5 (Pipelines) is specified in `docs/workflow-toolkit.md` but not yet implemented. Pipelines will orchestrate multi-phase workflows with human-in-the-loop command sequencing.
-
-> **Note:** The `auto_review` flag in registry entries is declarative only. Commands currently call reviewers explicitly in their steps. Automatic reviewer invocation after author completion is planned.
-
-### Author/Reviewer Pairs
-
-| Role | Naming | Purpose |
-|------|--------|---------|
-| architect | `[domain]-architect` | Creates specs/designs |
-| engineer | `[domain]-engineer` | Creates code |
-| editor | `[artifact]-editor` | Creates documents |
-| reviewer | `[artifact]-reviewer` | Validates against policies |
-
-Support agents (explorers, investigators) gather context but don't produce artifacts.
-
-### Policy Fetching
-
-The plugin includes a PreToolUse hook that injects policies before agent invocations:
-
-1. **Plugin policies** (`${CLAUDE_PLUGIN_ROOT}/policies/`) - Base policies bundled with the plugin
-2. **Project policies** (`$CLAUDE_PROJECT_DIR/policies/`) - Project-specific policies
-
-This requires `@rcrsr/mcp-policy-server` to be available via npx.
-
-### Bundled Policies
-
-| Policy | File | Description |
-|--------|------|-------------|
-| §META | `policies-meta.md` | Policy document structure standards |
-| §WFT | `policies-wft.md` | Workflow standards |
-| §AGENT | `policies-agents.md` | Subagent configuration standards |
-
-See `docs/repmat-framework.md` for the complete framework specification.
-
-## Structure
-
-```
-wft/
-├── .claude-plugin/
-│   └── plugin.json              # Plugin metadata
-├── registry.yaml                # Artifact registry
-├── commands/                    # User-invocable slash commands
-├── agents/                      # Subagent definitions
-├── hooks/
-│   └── hooks.json               # PreToolUse policy fetch
-├── policies/                    # §META, §WFT, §AGENT
-├── presets/                     # Dynamic guidance for artifact design
-└── docs/
-    └── repmat-framework.md      # Framework specification
-```
