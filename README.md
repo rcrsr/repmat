@@ -84,7 +84,7 @@ Presets provide detection signals and web search queries to find current best pr
 
 | Category | Presets | Purpose |
 |----------|---------|---------|
-| Code | `code`, `service`, `frontend`, `mobile`, `desktop`, `cli`, `library` | Application code and packages |
+| Code | `code`, `service`, `web`, `mobile`, `desktop`, `cli`, `library` | Application code and packages |
 | Data | `jupyter`, `schema` | Notebooks and database schemas |
 | Infrastructure | `infrastructure` | IaC (CDK, Terraform, Kubernetes) |
 | Documents | `document`, `spec`, `plan`, `requirements`, `runbook`, `api-docs` | Document types |

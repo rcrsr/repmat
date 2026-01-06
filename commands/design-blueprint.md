@@ -109,4 +109,4 @@ If all policies exist:
 - Always confirm meta_type before designing
 - Policies must be created before implementation
 - When `--preset` specified, use preset defaults as suggestions (user can override)
-- Available presets: service, frontend, mobile, desktop, cli, library, infrastructure, schema, code, document, spec, plan, requirements, runbook, api-docs, jupyter
+- Available presets: service, web, mobile, desktop, cli, library, infrastructure, schema, code, document, spec, plan, requirements, runbook, api-docs, jupyter

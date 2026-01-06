@@ -100,7 +100,7 @@ Examine security-related patterns:
 
 | Category | Example Presets | meta_type | author_role |
 |----------|-----------------|-----------|--------------|
-| Code | code, service, frontend, mobile, desktop, cli, library | stateless | engineer |
+| Code | code, service, web, mobile, desktop, cli, library | stateless | engineer |
 | Data | jupyter, schema | stateless | engineer |
 | Infrastructure | infrastructure | stateless | engineer |
 | Documents | document, spec, plan, requirements, runbook, api-docs | status/tasklist | editor/architect |
@@ -108,7 +108,7 @@ Examine security-related patterns:
 ### Combining Presets
 
 Presets can apply together. When analyzing a codebase:
-- Full-stack app: `frontend` + `service` + `schema`
+- Full-stack app: `web` + `service` + `schema`
 - Mobile backend: `mobile` + `service`
 - Published package: `library` + `code`
 

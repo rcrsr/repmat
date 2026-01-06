@@ -1,4 +1,4 @@
-# Frontend
+# Web
 
 Preset for web frontend/UI code. Auto-detects framework and patterns.
 

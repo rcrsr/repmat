@@ -159,4 +159,4 @@ If all policies exist:
 - Always check for registry conflicts before finalizing
 - Policies must be created before implementation
 - When `--preset` specified, load preset before discovery to guide analysis
-- Available presets: service, frontend, mobile, desktop, cli, library, infrastructure, schema, code, document, spec, plan, requirements, runbook, api-docs, jupyter
+- Available presets: service, web, mobile, desktop, cli, library, infrastructure, schema, code, document, spec, plan, requirements, runbook, api-docs, jupyter
