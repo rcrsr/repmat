@@ -1,0 +1,45 @@
+# WFT Plugin Artifact Registry
+# Defines artifact types with their author/reviewer pairs and governing policies
+
+artifacts:
+  repmat-spec:
+    patterns:
+      - "docs/specs/*.md"
+    author: repmat-architect
+    reviewer: repmat-spec-reviewer
+    policies:
+      - policies-wft.md
+    auto_review: true
+    meta_type: status
+    states: [Draft, In Review, Approved, Rejected]
+
+  policy:
+    patterns:
+      - "policies/*.md"
+    author: repmat-policy-engineer
+    reviewer: repmat-policy-reviewer
+    policies:
+      - policies-meta.md
+    auto_review: true
+    meta_type: stateless
+
+  command:
+    patterns:
+      - "commands/*.md"
+    author: repmat-command-engineer
+    reviewer: repmat-command-reviewer
+    policies:
+      - policies-wft.md
+    auto_review: true
+    meta_type: stateless
+
+  agent:
+    patterns:
+      - "agents/*.md"
+    author: repmat-subagent-engineer
+    reviewer: repmat-subagent-reviewer
+    policies:
+      - policies-wft.md
+      - policies-agents.md
+    auto_review: true
+    meta_type: stateless
