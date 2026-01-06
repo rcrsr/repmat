@@ -1,4 +1,5 @@
-**Experimental** — This is work in progress and may not work reliably yet. Use at your own risk.
+> [!CAUTION]
+> This is very much work in progress and may not work reliably yet. Use at your own risk.
 
 # Repmat
 
