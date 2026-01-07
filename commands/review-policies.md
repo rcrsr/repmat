@@ -4,62 +4,75 @@ description: Review all policy files against META standards in parallel
 
 # Review All Policies
 
-Audit all policy documents in `policies/` directory against META policy standards.
+Audit all policy documents in `.claude/policies/` against §META standards. Non-compliant policies waste tokens and reduce agent compliance.
 
 ## Step 1: Enumerate Policy Files
 
-List all markdown files in the policies directory:
-
 ```bash
-ls -1 policies/*.md
+ls -1 .claude/policies/*.md
 ```
 
 ## Step 2: Parallel Review
 
-For EACH policy file found, spawn a `repmat-policy-reviewer` subagent in parallel:
+For EACH policy file, spawn a `repmat-policy-reviewer` in parallel:
 
 ```
-Task(@agent-repmat-policy-reviewer, "Review policies/{filename} against §META standards. Generate a structured report with metrics, findings by severity, and recommendations.")
+Task(@repmat-policy-reviewer, "Review .claude/policies/{filename} against §META.
+
+Check:
+- Structure: title, TOC, {§PREFIX.X} headers, {§END} marker
+- Size: <500 lines doc, <50 lines section, <10 lines example
+- Content: explicit rules, context before rules, correct/incorrect pairs, tables
+- References: all §PREFIX.X resolve to valid sections
+
+Generate report with metrics, findings by severity, recommendations.")
 ```
 
-Launch ALL policy reviews simultaneously using parallel Task calls in a single response.
+Launch ALL reviews simultaneously using parallel Task calls.
 
 ## Step 3: Aggregate Results
 
-After all reviews complete, produce a summary report:
+After all reviews complete, produce summary:
 
 ```markdown
 # Policy Review Summary
 
 ## Overview
 
-| Policy  | Lines | Violations | Status    |
-| ------- | ----- | ---------- | --------- |
-| §PREFIX | X     | Y          | Pass/Fail |
+| Policy | Lines | Critical | High | Medium | Status |
+| ------ | ----- | -------- | ---- | ------ | ------ |
+| §PREFIX | X | 0 | 0 | 2 | Pass |
+| §OTHER | Y | 1 | 0 | 0 | Fail |
 
 ## Critical Issues
 
-[List any Critical severity findings across all policies]
+[List Critical findings — must fix before use]
 
-## Recommendations
+## High Priority
 
-### High Priority
+[List High findings — fix soon]
 
-[Consolidated high-priority fixes across policies]
+## Medium Priority
 
-### Medium Priority
-
-[Consolidated medium-priority fixes]
+[List Medium findings — fix when convenient]
 
 ## Next Steps
 
-1. [Specific action items]
-2. [Specific action items]
+1. [Specific action with file:line reference]
+2. [Specific action with file:line reference]
 ```
+
+## Pass/Fail Criteria
+
+| Verdict | Condition |
+| ------- | --------- |
+| Pass | Zero Critical AND zero High violations |
+| Fail | Any Critical OR any High violation |
 
 ## Execution Notes
 
-- Use `run_in_background: true` for each Task if policies exceed 5 files
-- Wait for all background tasks before aggregating
-- A policy PASSES if it has zero Critical and zero High violations
-- A policy FAILS if it has any Critical or High violations
+| Condition | Action |
+| --------- | ------ |
+| More than 5 policy files | Use `run_in_background: true` for each Task |
+| Background tasks used | Wait for all to complete before aggregating |
+| Mixed results | List failing policies first in summary |

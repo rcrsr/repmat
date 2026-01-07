@@ -5,25 +5,26 @@ argument-hint: <policy-prefix> [spec-or-pattern]
 
 # Create Policies
 
-Create policies by extracting patterns from existing artifact files.
+Extract patterns from existing code to create policy documents. Policies codify conventions that already exist in the codebase, ensuring agents follow established patterns.
 
 ## Step 1: Validate Input
 
-- $1 = policy prefix (e.g., BE, FE, PY) (required)
-- $2 = spec path OR file pattern (optional)
-  - If `.md` file: read as artifact spec, extract patterns
-  - If glob pattern: use directly (e.g., `apps/api/**/*.py`)
-  - If omitted: prompt user for pattern
+| Argument | Required | Description |
+| -------- | -------- | ----------- |
+| $1 | Yes | Policy prefix (e.g., API, AUTH, TEST) — 2-6 uppercase chars |
+| $2 | No | Spec path (`.md`) OR glob pattern (e.g., `src/**/*.py`) |
+
+If $2 omitted, prompt user for file pattern.
 
 ## Step 2: Identify Artifact Files
 
-**If spec provided:**
+**If spec provided ($2 ends in `.md`):**
 ```
 Read artifact spec at $2
 Extract file patterns from registry entry
 ```
 
-**If pattern provided:**
+**If glob pattern provided:**
 ```
 Use $2 directly as glob pattern
 ```
@@ -34,7 +35,7 @@ Glob for files matching pattern(s)
 Report: Found N files matching [patterns]
 ```
 
-## Step 3: Extract Patterns from Artifacts
+## Step 3: Extract Patterns
 
 ```
 Task(@repmat-domain-analyzer, "Extract policy rules from existing artifacts:
@@ -42,83 +43,85 @@ Task(@repmat-domain-analyzer, "Extract policy rules from existing artifacts:
 Files to analyze: [matched files from Step 2]
 
 For each file, identify:
-1. **Naming conventions** — file names, function/class names, variables
-2. **Structure patterns** — imports, organization, module layout
-3. **Code idioms** — common patterns, error handling, logging
-4. **Framework usage** — how frameworks are used (FastAPI routes, React hooks)
-5. **Documentation style** — docstrings, comments, type hints
+1. Naming conventions — file names, function/class names, variables
+2. Structure patterns — imports, organization, module layout
+3. Code idioms — common patterns, error handling, logging
+4. Framework usage — how frameworks are used
+5. Documentation style — docstrings, comments, type hints
 
-Aggregate across all files:
-- Most common patterns (>50% of files)
-- Consistent conventions
-- Anti-patterns to prohibit (inconsistencies found)
+Aggregate findings:
 
-Output: Patterns report with frequency/confidence for each rule.")
+| Pattern | Frequency | Confidence |
+| ------- | --------- | ---------- |
+| [pattern] | X% of files | High/Medium/Low |
+
+Output: Patterns report with frequency table.")
 ```
 
 ## Step 4: Check Existing Policies
 
-Read `policies/` directory:
+Read `.claude/policies/` directory:
 - Find existing policies with similar scope
-- Identify what can be reused vs created
-- Note potential overlaps
+- Identify reusable content vs new content needed
+- Note overlaps to avoid duplication
 
-## Step 5: Create Policy from Extracted Patterns
+## Step 5: Create Policy
 
 ```
 Task(@repmat-policy-engineer, "Create policy §$1 from extracted patterns.
 
-Location: policies/policies-$1.md
+Location: .claude/policies/policies-$1.md
 
 Input:
 - Extracted patterns: [from Step 3]
 - Files analyzed: [N files]
 - Existing policies: [from Step 4]
 
-Create policy sections for each pattern category:
-- {§$1.1} File Organization — extracted naming/structure rules
-- {§$1.2} Code Patterns — extracted idioms with examples
-- {§$1.3} Framework Usage — extracted framework conventions
-- {§$1.4} Prohibited Patterns — anti-patterns found (inconsistencies)
+Structure:
+- {§$1.1} File Organization — naming/structure rules
+- {§$1.2} Code Patterns — idioms with correct/incorrect examples
+- {§$1.3} Framework Usage — framework conventions
+- {§$1.4} Prohibited Patterns — anti-patterns to avoid
 
 For each rule:
-- State the rule clearly
-- Show example from analyzed files (anonymized, under 10 lines)
-- Note frequency/confidence (e.g., 'found in 90% of files')
+- State context (WHY this rule exists)
+- State the rule explicitly (no vague language)
+- Show correct AND incorrect examples (under 10 lines each)
+- Note frequency (e.g., 'found in 90% of files')
 
-Follow §META structure with {§END} marker.")
+Follow §META limits: <500 lines total, <50 lines per section, <10 lines per example.")
 ```
 
 ## Step 6: Review Policy
 
 ```
-Task(@repmat-policy-reviewer, "Review policies/policies-$1.md against §META.
+Task(@repmat-policy-reviewer, "Review .claude/policies/policies-$1.md against §META.
 
 Verify:
-- Rules derived from actual artifact patterns
-- Examples are real (from analyzed files)
-- Self-contained (no external dependencies)
-- Frequency/confidence noted for rules")
+- All rules pass actionability test (no vague language)
+- Each rule has context explaining WHY
+- Examples show correct AND incorrect
+- Frequency/confidence noted for each rule
+- Under 500 lines total")
 ```
 
 ## Step 7: Report
 
-Summarize:
-- Policy created: `policies/policies-$1.md`
-- Extracted from: [N files matching pattern]
-- Rules defined: [count per category]
-- Review verdict
+| Item | Value |
+| ---- | ----- |
+| Policy created | `.claude/policies/policies-$1.md` |
+| Source files | [N files matching pattern] |
+| Sections | [count] |
+| Review verdict | Pass/Fail |
 
-**Next command:**
-```
-/repmat:implement-blueprint $2
-```
+**Next command:** `/repmat:implement-blueprint $2`
 
 ## Important Rules
 
-- Extract rules from actual artifact files, not assumptions
-- Include frequency/confidence for each rule
-- Examples must come from analyzed files (anonymized)
-- Each policy must be self-contained (§WFT.6.2)
-- Examples under 10 lines
-- Policy must be created before implement-blueprint
+| Rule | Rationale |
+| ---- | --------- |
+| Extract from actual files | Policies must reflect real patterns, not assumptions |
+| Include frequency data | Confidence comes from prevalence in codebase |
+| Show correct AND incorrect | Contrast clarifies boundaries |
+| Examples under 10 lines | Longer examples dilute impact |
+| Policy under 500 lines | Long policies reduce compliance |
