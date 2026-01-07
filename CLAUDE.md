@@ -5,12 +5,7 @@ Repmat: construction kit for policy-governed agent workflows. See @docs/repmat-f
 ## Testing
 
 ```bash
-# Local testing
-claude --plugin-dir ~/projects/wft
-
-# Install to project/user scope
-claude plugin install ~/projects/wft --scope project
-claude plugin install ~/projects/wft --scope user
+claude --plugin-dir ~/projects/repmat
 ```
 
 ## Commands
