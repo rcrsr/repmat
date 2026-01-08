@@ -1,9 +1,10 @@
 {
   "name": "repmat",
   "description": "Construction kit for building policy-governed agent workflows",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "author": {
-    "name": "Andre Bremer <andre@gxpsoft.co>"
+    "name": "Andre Bremer",
+    "url": "https://andrebremer.com"
   },
   "license": "MIT",
   "keywords": ["workflow", "agents", "policies", "domain-analysis", "automation"]
